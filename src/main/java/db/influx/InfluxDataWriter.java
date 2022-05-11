@@ -24,32 +24,46 @@ public class InfluxDataWriter {
     private static String bucket = "blake";
     private static Random random = new Random();
 
+    private static int size = 50;
     public static void main(String[] args) {
 
         InfluxDBClient influxDBClient = InfluxDBClientFactory.create("http://localhost:8086", token, org, bucket);
 
         WriteApiBlocking writeApi = influxDBClient.getWriteApiBlocking();
-
-        writeApi.writePoints(generatePoints(1));
-
+        int batch = 1 ;
+        long start = System.currentTimeMillis();
+        writeBatch(batch,size,writeApi);
+        long end = System.currentTimeMillis();
+        System.out.println("time consumer: "+(end-start));
         influxDBClient.close();
 
     }
 
 
 
+    public static void writeBatch(int batch,int size,WriteApiBlocking writeApi){
 
+        int iteration = (int)Math.ceil(size/batch);
 
-    private static List<Point> generatePoints(int batch){
-        List<Point> pointList = new ArrayList<>();
-        for (int i =0 ; i < batch;i++){
-            Point point = Point.measurement("temperature")
-                    .addTag("tag1", "tag1")
-                    .addField("value", generateValue())
-                    .time(Instant.now().toEpochMilli(), WritePrecision.NS);
-            pointList.add(point);
+        for (int i =0; i< iteration; i++){
+            List<DataPoint> points = generatePoints(batch);
+            writeApi.writeMeasurements(WritePrecision.NS,points);
         }
 
+    }
+
+
+
+
+    private static List<DataPoint> generatePoints(int batch){
+        List<DataPoint> pointList = new ArrayList<>();
+        for (int i =0 ; i < batch;i++){
+            DataPoint dataPoint = new DataPoint();
+            dataPoint.sensor = "sensor01";
+            dataPoint.value = generateValue();
+            dataPoint.time = Instant.now();
+            pointList.add(dataPoint);
+        }
         return pointList ;
     }
 
@@ -66,17 +80,15 @@ public class InfluxDataWriter {
 
 
 
-    @Measurement(name = "temperature")
-    private static class Temperature {
+    @Measurement(name = "datapoint")
+    private static class DataPoint {
 
         @Column(tag = true)
-        String location;
+        String sensor;
 
         @Column
         Double value;
 
-        @Column
-        String ff;
 
         @Column(timestamp = true)
         Instant time;
