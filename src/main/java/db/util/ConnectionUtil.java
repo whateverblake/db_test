@@ -1,17 +1,15 @@
-package db.taos;
+package db.util;
 
 import com.taosdata.jdbc.TSDBDriver;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 public class ConnectionUtil {
 
 
-    public static Connection getConn() throws Exception {
-        String jdbcUrl = "jdbc:TAOS-RS://127.0.0.1:6041/test?user=root&password=taosdata";
+    public static Connection getConn(String jdbcUrl) throws Exception {
         Properties connProps = new Properties();
         connProps.setProperty(TSDBDriver.PROPERTY_KEY_BATCH_LOAD, "true");
         connProps.setProperty(TSDBDriver.PROPERTY_KEY_CHARSET, "UTF-8");

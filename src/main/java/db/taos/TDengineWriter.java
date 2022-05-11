@@ -1,6 +1,7 @@
 package db.taos;
 
 import com.taosdata.jdbc.TSDBDriver;
+import db.util.ConnectionUtil;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,13 +16,13 @@ public class TDengineWriter {
 
     private static Random random = new Random();
 
-
+    private static String jdbcUrl = "jdbc:TAOS-RS://127.0.0.1:6041/test?user=root&password=taosdata";
     public static void main(String[] args) {
         int batch = 1;
         int size = 50;
         Connection conn = null;
         try {
-            conn = ConnectionUtil.getConn();
+            conn = ConnectionUtil.getConn(jdbcUrl);
             createTable(conn);
             long start = System.currentTimeMillis();
 //            truncateTable("device1",conn);

@@ -1,6 +1,7 @@
 package db.taos;
 
 import com.taosdata.jdbc.TSDBDriver;
+import db.util.ConnectionUtil;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,10 +12,12 @@ import java.util.*;
 public class TDengineReader {
 
 
+    private static String jdbcUrl = "jdbc:TAOS-RS://127.0.0.1:6041/test?user=root&password=taosdata";
+
     public static void main(String[] args) {
         Connection conn = null;
         try {
-            conn = ConnectionUtil.getConn();
+            conn = ConnectionUtil.getConn(jdbcUrl);
             long start = System.currentTimeMillis();
             doSearch();
             long end = System.currentTimeMillis();
@@ -39,7 +42,7 @@ public class TDengineReader {
 
         System.out.println(sql);
         try {
-            double res = ConnectionUtil.sqlExecuteWithResult(ConnectionUtil.getConn(),sql);
+            double res = ConnectionUtil.sqlExecuteWithResult(ConnectionUtil.getConn(jdbcUrl),sql);
             System.out.println(res);
         } catch (Exception e) {
             e.printStackTrace();
