@@ -51,7 +51,6 @@ public class InfluxDataWriter {
             writeApi.writeMeasurements(WritePrecision.NS,points);
             long subEnd = System.currentTimeMillis();
             System.out.println("write batch iteration :"+i+" consumer:"+(subEnd-subStart));
-
         }
 
     }
