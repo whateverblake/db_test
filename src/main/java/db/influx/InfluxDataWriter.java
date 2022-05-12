@@ -46,8 +46,12 @@ public class InfluxDataWriter {
         int iteration = (int)Math.ceil(size/batch);
 
         for (int i =0; i< iteration; i++){
+            long subStart = System.currentTimeMillis();
             List<DataPoint> points = generatePoints(batch);
             writeApi.writeMeasurements(WritePrecision.NS,points);
+            long subEnd = System.currentTimeMillis();
+            System.out.println("write batch iteration :"+i+" consumer:"+(subEnd-subStart));
+
         }
 
     }
