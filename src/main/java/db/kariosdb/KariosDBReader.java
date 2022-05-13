@@ -40,9 +40,9 @@ public class KariosDBReader {
         QueryBuilder builder = QueryBuilder.getInstance();
 
         builder.setStart(start, timeUnit)
-                .setEnd(end, timeUnit)
+//                .setEnd(end, timeUnit)
                 .addMetric(metric)
-                .addTags(tags)
+//                .addTags(tags)
                 .addAggregator(AggregatorFactory
                         .createAverageAggregator(5, TimeUnit.MINUTES));
 
