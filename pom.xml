@@ -91,6 +91,16 @@
     </dependency>
 
 
+    <!-- https://mvnrepository.com/artifact/org.kairosdb/client -->
+    <dependency>
+      <groupId>org.kairosdb</groupId>
+      <artifactId>client</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+
+
+
+
 
     <dependency>
       <groupId>com.datastax.cassandra</groupId>
@@ -132,7 +142,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.siemens.main.Main</mainClass>
+              <mainClass>db.taos.TDengineWriter</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
