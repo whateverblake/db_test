@@ -27,7 +27,6 @@ public class InfluxDbReader {
 
         InfluxDBClient influxDBClient = InfluxDBClientFactory.create("http://localhost:8086", token, org, bucket);
 
-
         //
         // Query data
         //
@@ -36,7 +35,6 @@ public class InfluxDbReader {
                 "    |> range(start: -2d,stop:now()) " +
                 "    |> filter(fn: (r) => r._measurement == \"datapoint\" and r.sensor == \"sensor01\")" +
                 "    |> mean()";
-
 
         String start="-2d";
         String end = "now()";

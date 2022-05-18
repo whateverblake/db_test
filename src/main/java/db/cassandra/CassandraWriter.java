@@ -48,7 +48,8 @@ public class CassandraWriter {
 
             for (DataPoint dataPoint : dataPointList) {
                 BoundStatement boundStatement = preparedStatement.bind(
-                        dataPoint.getSensorId(), dataPoint.getTime(), dataPoint.getTag(),
+                        dataPoint.getSensorId(), dataPoint.getTime(),
+//                        dataPoint.getTag(),
                         dataPoint.getValue());
                 batchStatement.add(boundStatement);
             }
@@ -64,7 +65,7 @@ public class CassandraWriter {
         String tag = "tag1";
         List<DataPoint> dataPointList = new ArrayList<>();
         for (int i = 0; i < batch; i++) {
-            dataPointList.add(new DataPoint(sensorId, System.currentTimeMillis(), generateValue(), tag));
+//            dataPointList.add(new DataPoint(sensorId, System.currentTimeMillis(), generateValue(), tag));
         }
 
         return dataPointList;

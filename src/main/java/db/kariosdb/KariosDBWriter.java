@@ -1,70 +1,75 @@
 package db.kariosdb;
 
 
+import com.influxdb.client.InfluxDBClientFactory;
+import db.Main;
+import db.entity.DataPoint;
+import db.writer.BaseWriter;
 import org.kairosdb.client.HttpClient;
 import org.kairosdb.client.builder.Metric;
 import org.kairosdb.client.builder.MetricBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class KariosDBWriter {
-    private static Random random = new Random();
+public class KariosDBWriter extends BaseWriter {
+    private static Logger logger = LoggerFactory.getLogger(KariosDBWriter.class);
 
-    public static void main(String[] args) {
+    private static HttpClient httpClient ;
+    private static String url;
+    static {
+        url = System.getProperty("kairos_url");
+    }
 
+    public KariosDBWriter() {
+
+        createClient();
+
+    }
+
+    public void createClient() {
         try {
-            HttpClient httpClient = new HttpClient("http://localhost:8080");
-            int size = 50;
-            int batch = 1;
-            String metric = "sensor01";
-            int iteration = (int) Math.ceil(size / batch);
-            Map<String, String> tags = new HashMap<>();
-            tags.put("tag1", "tag1");
-            tags.put("tag2", "tag2");
-            long startTime = System.currentTimeMillis();
-            AtomicLong now = new AtomicLong(startTime);
-            for (int i = 0; i < iteration; i++) {
-                generateData(httpClient, batch, metric, tags,now);
-            }
-            long endTime = System.currentTimeMillis();
-            System.out.println("time consume: " + (endTime - startTime));
-
-
-        } catch (IOException e) {
+            httpClient = new HttpClient("http://localhost:8080");
+        } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
     }
 
 
-    public static void generateData(HttpClient httpClient, int batch, String metric, Map<String, String> tags,AtomicLong now) {
 
+    @Override
+    public void saveDataPoint(List<DataPoint> dataPointList) {
+        try{
+            MetricBuilder builder = convertDataPointToMetric(dataPointList);
+            httpClient.pushMetrics(builder);
+        }catch (Exception e){
+            logger.error("write data error",e);
+        }
+
+
+    }
+
+    private MetricBuilder convertDataPointToMetric(List<DataPoint> dataPointList){
         MetricBuilder builder = MetricBuilder.getInstance();
-
-        Metric mt = builder.addMetric(metric);
-        for (Map.Entry<String, String> entry : tags.entrySet()) {
-            String tag = entry.getKey();
-            String value = entry.getValue();
-            mt.addTag(tag, value);
+        DataPoint dataPoint = dataPointList.get(0);
+        Metric mt = builder.addMetric(dataPoint.getSensorId());
+        List<String> tags = dataPoint.getTags();
+        if(tags!=null && tags.size() >0){
+            for(String tag: tags){
+                mt.addTag(tag,tag);
+            }
+        }
+        for(DataPoint dataPoint1: dataPointList){
+            mt.addDataPoint(dataPoint1.getTime(),dataPoint1.getValue());
         }
 
-        for (int i = 0; i < batch; i++) {
-            mt.addDataPoint(now.longValue(), generateValue());
-            now.incrementAndGet();
-        }
-
-        httpClient.pushMetrics(builder);
-
+        return builder ;
     }
-
-
-    private static Double generateValue() {
-        return random.nextDouble() * 100;
-    }
-
-
 }

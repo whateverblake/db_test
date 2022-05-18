@@ -29,5 +29,6 @@ log/
 hs_err_pid*
 target
 target/*
-configuration/
+#configuration/
 src/main/java/com/siemens/pdm/mqtt/.DS_Store
+.DS_Store

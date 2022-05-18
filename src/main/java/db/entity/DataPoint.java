@@ -1,27 +1,29 @@
 package db.entity;
 
+import java.util.List;
+
 public class DataPoint {
 
     private String sensorId;
     private long time;
     private double value;
-    private String tag;
+    private List<String> tags;
 
     public DataPoint() {
 
     }
 
-    public DataPoint(String sensorId, long time, double value, String tag) {
+    public DataPoint(String sensorId, long time, double value,List<String> tags) {
         this.sensorId = sensorId;
         this.time = time;
         this.value = value;
-        this.tag = tag;
+        this.tags = tags;
     }
 
-    public DataPoint(long time, double value, String tag) {
+    public DataPoint(long time, double value,List<String> tags) {
         this.time = time;
         this.value = value;
-        this.tag = tag;
+        this.tags = tags;
     }
 
     public long getTime() {
@@ -40,12 +42,12 @@ public class DataPoint {
         this.value = value;
     }
 
-    public String getTag() {
-        return tag;
+    public List<String> getTags() {
+        return tags;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     public String getSensorId() {
