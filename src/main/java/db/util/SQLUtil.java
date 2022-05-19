@@ -2,15 +2,17 @@ package db.util;
 
 import com.taosdata.jdbc.TSDBDriver;
 import db.entity.DataPoint;
+import db.entity.ReaderEntity;
 
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class SQLUtil {
 
 
-    public static Connection getConn(String jdbcUrl,String driverName) throws Exception {
+    public static Connection getConn(String jdbcUrl, String driverName) throws Exception {
         Class.forName(driverName);
         Properties connProps = new Properties();
         connProps.setProperty(TSDBDriver.PROPERTY_KEY_BATCH_LOAD, "true");
@@ -22,24 +24,23 @@ public class SQLUtil {
     }
 
 
-
     public static void preparedStatementExecute(String sql, List<DataPoint> dataPointList) {
         Connection connection = Druid.getConnection();
-        PreparedStatement pstm = null ;
+        PreparedStatement pstm = null;
 
         try {
             pstm = connection.prepareStatement(sql);
-            for (DataPoint  dataPoint : dataPointList) {
+            for (DataPoint dataPoint : dataPointList) {
                 int index = 1;
 //                pstm.setString(index,dataPoint.getSensorId());
 //                index++;
-                pstm.setLong(index,dataPoint.getTime());
+                pstm.setLong(index, dataPoint.getTime());
                 index++;
-                pstm.setDouble(index,dataPoint.getValue());
+                pstm.setDouble(index, dataPoint.getValue());
                 index++;
                 List<String> tags = dataPoint.getTags();
-                for(String tag : tags){
-                    pstm.setString(index,tag);
+                for (String tag : tags) {
+                    pstm.setString(index, tag);
                     index++;
                 }
 
@@ -52,8 +53,6 @@ public class SQLUtil {
             Druid.releaseConnection(connection, pstm, null);
         }
     }
-
-
 
 
     public static void sqlExecute(List<String> sqls) {
@@ -108,30 +107,29 @@ public class SQLUtil {
         return result;
     }
 
-//    public static void closeConnection(Connection conn){
-//        if (conn != null) {
-//            try {
-//                conn.close();
-//                System.exit(0);
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//
-//    public static void closeStatement(Statement statement){
-//        try {
-//            statement.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    public static void closeResultSet(ResultSet resultSet){
-//        try {
-//            resultSet.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
+
+    public static String sqlGenerateForTDB(ReaderEntity readerEntity, String tableName) {
+        long startTime = readerEntity.getStartTime();
+        long endTime = readerEntity.getEndTime();
+        String aggregation = readerEntity.getAggregation();
+        Map<String, String> tags = readerEntity.getTags();
+
+        StringBuilder tagSb = new StringBuilder();
+        if (tags != null && tags.size() > 0) {
+            for (Map.Entry<String, String> entry : tags.entrySet()) {
+                tagSb.append(" and ");
+                String tag = entry.getKey();
+                String value = entry.getValue();
+                tagSb.append(tag).append("= '").append(value).append("'");
+            }
+        }
+        StringBuilder sqlSB = new StringBuilder();
+        sqlSB.append("select ").append(aggregation).append("(").append("value").append(")").append(" from ").append(tableName)
+                .append(" where time >=").append(startTime).append(" and time<= ").append(endTime).append(tagSb.toString());
+
+        return sqlSB.toString();
+
+    }
+
+
 }

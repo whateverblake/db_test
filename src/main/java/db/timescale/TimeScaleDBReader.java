@@ -1,14 +1,30 @@
 package db.timescale;
 
+import db.entity.ReaderEntity;
+import db.reader.BaseReader;
+import db.taos.TDengineReader;
 import db.util.SQLUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TimeScaleDBReader {
+public class TimeScaleDBReader  extends BaseReader {
+    private static Logger logger = LoggerFactory.getLogger(TimeScaleDBReader.class);
 
-//    private static String jdbcUrl = "jdbc:postgresql://127.0.0.1:5432/db_test?user=postgres&password=123456";
+    @Override
+    public double doQuery(ReaderEntity readerEntity) {
+        String querySQL = SQLUtil.sqlGenerateForTDB(readerEntity,
+                "sensor_data");
+        logger.info("======= sql = {}",querySQL);
+
+        return SQLUtil.sqlExecuteWithResult(querySQL);
+    }
+
+
+    //    private static String jdbcUrl = "jdbc:postgresql://127.0.0.1:5432/db_test?user=postgres&password=123456";
 //
 //    public static void main(String[] args) {
 //        Connection conn = null;

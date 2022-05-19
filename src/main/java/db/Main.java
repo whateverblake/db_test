@@ -2,11 +2,17 @@ package db;
 
 import db.constant.Constants;
 import db.entity.ReaderEntity;
+import db.influx.InfluxDbReader;
 import db.influx.InfluxWriterRunner;
 import db.kariosdb.KairosWriterRunner;
+import db.kariosdb.KariosDBReader;
+import db.reader.BaseReader;
 import db.runner.BaseRunner;
+import db.sqlite.SqliteReader;
 import db.sqlite.SqliteWriterRunner;
+import db.taos.TDengineReader;
 import db.taos.TaosWriterRunner;
+import db.timescale.TimeScaleDBReader;
 import db.timescale.TimeScaleWriterRunner;
 import db.writer.BaseWriter;
 import org.slf4j.Logger;
@@ -40,11 +46,11 @@ public class Main {
         try {
 
             operation = System.getProperty("operation");
+            dbName = System.getProperty("dbName");
             if(operation.equals("write")){
                 totalSize = Integer.parseInt(System.getProperty("totalSize"));
                 batchSize = Integer.parseInt(System.getProperty("batchSize"));
                 threadNum = Integer.parseInt(System.getProperty("threadNum"));
-                dbName = System.getProperty("dbName");
                 String tagsStr = System.getProperty("tags");
                 tags = parseTags(tagsStr);
                 startTime = Long.parseLong(System.getProperty("startTime"));
@@ -100,10 +106,33 @@ public class Main {
     public static void doRead(){
 
         ReaderEntity readerEntity = new ReaderEntity(readStartTime,readEndTime,readAggregation,readTagsStr,readTags);
-
-
+        BaseReader baseReader = null ;
+        switch (dbName){
+            case Constants.SQLITE:
+                baseReader = new SqliteReader();
+                break;
+            case Constants.TAOS:
+                baseReader = new TDengineReader();
+                break;
+            case Constants.TIMESCALE:
+                baseReader = new TimeScaleDBReader();
+                break;
+            case Constants.INFLUXDB:
+                baseReader = new InfluxDbReader();
+                break;
+            case Constants.KAIROSDB:
+                baseReader = new KariosDBReader();
+                break;
+        }
+        if(baseReader != null){
+            baseReader.queryData(readerEntity);
+        }else {
+            logger.info("......specific db type is not support.....");
+            System.exit(0);
+        }
 
     }
+
 
     public static void doWrite(){
         service = Executors.newFixedThreadPool(threadNum);

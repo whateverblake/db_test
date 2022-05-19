@@ -36,7 +36,7 @@ public class KariosDBWriter extends BaseWriter {
 
     public void createClient() {
         try {
-            httpClient = new HttpClient("http://localhost:8080");
+            httpClient = new HttpClient(url);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
