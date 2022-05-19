@@ -189,7 +189,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>db.taos.TDengineWriter</mainClass>
+              <mainClass>db.Main</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
