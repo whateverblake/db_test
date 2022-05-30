@@ -85,6 +85,10 @@ public class InfluxDataWriter extends BaseWriter {
 
             Point point = new Point(measurement);
             point.addField("value", dataPoint.getValue());
+            point.addField("value1", dataPoint.getValue());
+            point.addField("value2", dataPoint.getValue());
+            point.addField("value3", dataPoint.getValue());
+            point.addField("value4", dataPoint.getValue());
             Map<String, String> tags = new HashMap<>();
             for (String tag : dataPoint.getTags()) {
                 tags.put(tag, tag);

@@ -25,6 +25,8 @@ public class InfluxDbReader extends BaseReader {
     private static String org = "blake";
     private static String bucket = "blake";
     private static String measurement = "sensor_data";
+    private static String query_field = "value";
+
     private static String url;
     private InfluxDBClient influxDBClient;
     private QueryApi queryApi;
@@ -39,11 +41,13 @@ public class InfluxDbReader extends BaseReader {
             bucket = System.getProperty("influx_bucket");
             url = System.getProperty("influx_url");
             measurement = System.getProperty("influx_measurement");
-            logger.info("influxdb token = {}", tokenStr);
-            logger.info("influxdb org = {}", org);
-            logger.info("influxdb bucket = {}", bucket);
-            logger.info("influxdb url = {}", url);
-            logger.info("influxdb measurement = {}", measurement);
+            query_field = System.getProperty("influx_query_field","value");
+            logger.info("influxdb token = {}",tokenStr);
+            logger.info("influxdb org = {}",org);
+            logger.info("influxdb bucket = {}",bucket);
+            logger.info("influxdb url = {}",url);
+            logger.info("influxdb measurement = {}",measurement);
+            logger.info("influxdb query_field = {}",query_field);
             if (org == null || bucket == null || url == null || measurement == null) {
                 throw new RuntimeException("influxdb parameters are not set");
             }
@@ -148,7 +152,11 @@ public class InfluxDbReader extends BaseReader {
         sb.append("from (bucket: \"").append(bucket).append("\")").append(" |> range(start: ").append(start)
                 .append(", stop: ").append(end).append(")")
                 .append(" |> filter(fn: (r) => r._measurement == \"").append(measurement).append("\" ").append(tagSb.toString())
-                .append(" |> ").append(aggregation).append("()");
+                .append(" |> filter(fn: (r) => r._field == \"").append(query_field).append("\" ").append(tagSb.toString());
+
+        if(!aggregation.equals("list")){
+            sb.append(" |> ").append(aggregation).append("()");
+        }
 
         return sb.toString();
     }
