@@ -138,15 +138,19 @@ public class InfluxDbReader extends BaseReader {
 
         start = start / 1000;
         end = end / 1000;
-        StringBuilder tagSb = new StringBuilder();
+        String tagSQL = "";
+        StringBuilder tagSb = new StringBuilder("|> filter(fn: (r) =>");
         if (tags != null && tags.size() > 0) {
             for (Map.Entry<String, String> entry : tags.entrySet()) {
-                tagSb.append(" and ");
+//                tagSb.append(" and ");
                 String tag = entry.getKey();
                 String value = entry.getValue();
-                tagSb.append("r.").append(tag).append("== \"").append(value).append("\"");
+                tagSb.append(" r.").append(tag).append("== \"").append(value).append("\"");
+                tagSb.append(" and");
             }
-            tagSb.append(" )");
+            tagSQL= tagSb.substring(0,tagSb.lastIndexOf("and"));
+            tagSQL = tagSQL+" )";
+//            tagSb.append(" )");
 
         }
 
@@ -157,19 +161,20 @@ public class InfluxDbReader extends BaseReader {
         }
 
         for(String field : query_field_arr){
-            fieldFilter.append(" r._field ==\"").append(field).append("\" ").append(" and");
+            fieldFilter.append(" r._field ==\"").append(field).append("\" ").append(" or");
         }
 
-        int index = fieldFilter.lastIndexOf("and");
-        String fieldQuery = fieldFilter.substring(0,index);
+        int index = fieldFilter.lastIndexOf("or");
+        String fieldQuery = fieldFilter.substring(0,index)+" )";
 
         StringBuilder sb = new StringBuilder();
         sb.append("from (bucket: \"").append(bucket).append("\")").append(" |> range(start: ").append(start)
                 .append(", stop: ").append(end).append(")")
-                .append(" |> filter(fn: (r) => r._measurement == \"").append(measurement).append("\" ")
+                .append(" |> filter(fn: (r) => r._measurement == \"").append(measurement).append("\") ")
 //                .append(" |> filter(fn: (r) => r._field == \"").append(query_field).append("\" ").append(tagSb.toString());
                 .append(fieldQuery)
-                .append(tagSb.toString());
+                .append(tagSQL);
+//                .append(tagSb.toString());
 
         if(!aggregation.equals("list")){
             sb.append(" |> ").append(aggregation).append("()");
