@@ -26,6 +26,7 @@ public class InfluxDbReader extends BaseReader {
     private static String bucket = "blake";
     private static String measurement = "sensor_data";
     private static String query_field = "value";
+    private static String[] query_field_arr ;
 
     private static String url;
     private InfluxDBClient influxDBClient;
@@ -42,6 +43,7 @@ public class InfluxDbReader extends BaseReader {
             url = System.getProperty("influx_url");
             measurement = System.getProperty("influx_measurement");
             query_field = System.getProperty("influx_query_field","value");
+            query_field_arr = query_field.split(",");
             logger.info("influxdb token = {}",tokenStr);
             logger.info("influxdb org = {}",org);
             logger.info("influxdb bucket = {}",bucket);
@@ -148,11 +150,26 @@ public class InfluxDbReader extends BaseReader {
 
         }
 
+
+        StringBuilder fieldFilter = new StringBuilder("|> filter(fn: (r) => ");
+        if(!aggregation.equals("list")){
+            query_field_arr = new String[]{query_field_arr[0]};
+        }
+
+        for(String field : query_field_arr){
+            fieldFilter.append(" r._field ==\"").append(field).append("\" ").append(" and");
+        }
+
+        int index = fieldFilter.lastIndexOf("and");
+        String fieldQuery = fieldFilter.substring(0,index);
+
         StringBuilder sb = new StringBuilder();
         sb.append("from (bucket: \"").append(bucket).append("\")").append(" |> range(start: ").append(start)
                 .append(", stop: ").append(end).append(")")
-                .append(" |> filter(fn: (r) => r._measurement == \"").append(measurement).append("\" ").append(tagSb.toString())
-                .append(" |> filter(fn: (r) => r._field == \"").append(query_field).append("\" ").append(tagSb.toString());
+                .append(" |> filter(fn: (r) => r._measurement == \"").append(measurement).append("\" ")
+//                .append(" |> filter(fn: (r) => r._field == \"").append(query_field).append("\" ").append(tagSb.toString());
+                .append(fieldQuery)
+                .append(tagSb.toString());
 
         if(!aggregation.equals("list")){
             sb.append(" |> ").append(aggregation).append("()");

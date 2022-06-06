@@ -10,7 +10,7 @@ public class GenerateDataPointBatch {
 
     private static Random random = new Random();
 
-    private static Double generateValue() {
+    public static Double generateValue() {
         return random.nextDouble() * 100;
     }
 

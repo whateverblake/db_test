@@ -10,6 +10,7 @@ import com.influxdb.query.FluxRecord;
 import com.influxdb.query.FluxTable;
 import db.Main;
 import db.entity.DataPoint;
+import db.util.GenerateDataPointBatch;
 import db.writer.BaseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,11 +85,15 @@ public class InfluxDataWriter extends BaseWriter {
         for (DataPoint dataPoint : dataPointList) {
 
             Point point = new Point(measurement);
-            point.addField("value", dataPoint.getValue());
+
+           /* point.addField("value", dataPoint.getValue());
             point.addField("value1", dataPoint.getValue());
             point.addField("value2", dataPoint.getValue());
             point.addField("value3", dataPoint.getValue());
-            point.addField("value4", dataPoint.getValue());
+            point.addField("value4", dataPoint.getValue());*/
+
+            generateField(point);
+
             Map<String, String> tags = new HashMap<>();
             for (String tag : dataPoint.getTags()) {
                 tags.put(tag, tag);
@@ -100,6 +105,14 @@ public class InfluxDataWriter extends BaseWriter {
 
         return points;
 
+
+    }
+
+    private void generateField(Point point){
+        for(int i =0; i < 250; i++){
+            StringBuilder fieldName = new StringBuilder("value").append(i);
+            point.addField(fieldName.toString(), GenerateDataPointBatch.generateValue());
+        }
 
     }
 
